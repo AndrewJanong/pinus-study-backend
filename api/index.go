@@ -4,6 +4,7 @@ import (
 	"example/web-service-gin/database"
 	"example/web-service-gin/middlewares"
 	"example/web-service-gin/router"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,6 +60,15 @@ func setupRouter() *gin.Engine {
 func Handler(w http.ResponseWriter, r *http.Request) {
 	gin.SetMode(gin.ReleaseMode) // Set Gin to production mode
 	router := setupRouter()
+
+	router.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found"})
+	})
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, fmt.Sprintf("Error parsing form: %s", err), http.StatusBadRequest)
+		return
+	}
 
 	router.ServeHTTP(w, r)
 }
