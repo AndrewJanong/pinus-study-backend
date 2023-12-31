@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Handler(c *gin.Context) {
+func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	db := database.GetDb()
@@ -53,5 +53,12 @@ func Handler(c *gin.Context) {
 	r.GET("/likes/comment/:commentid/:userid", router.GetLikeComment(db))
 	r.POST("/likes/comment/:commentid/:userid/:state", middlewares.JwtAuthMiddleware(), router.SetLikeComment(db))
 
-	r.ServeHTTP(c.Writer, c.Request) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	return r
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	gin.SetMode(gin.ReleaseMode) // Set Gin to production mode
+	router := setupRouter()
+
+	router.ServeHTTP(w, r)
 }
